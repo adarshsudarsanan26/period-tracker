@@ -60,16 +60,22 @@ public class PartnerConfigController {
                 return ResponseEntity.badRequest().body("❌ Invalid Email Address");
             }
 
-            // 2. Prepare partner config
+            // 2. Check if we have an existing configuration
+            Optional<PartnerConfig> existingOpt = partnerConfigService.getConfigByUserId(user.getId());
+            boolean isUpdate = existingOpt.isPresent();
+            String originalEmail = isUpdate ? existingOpt.get().getPartnerEmail() : null;
+            boolean originalEnabled = isUpdate && existingOpt.get().isEnabled();
+
+            // 3. Prepare partner config
             PartnerConfig config = new PartnerConfig();
             config.setUserId(user.getId());
             config.setPartnerEmail(email);
             config.setEnabled(false); // Enable ONLY if test notification succeeds!
 
-            // 3. Save draft to get/generate details
+            // 4. Save draft to get/generate details
             config = partnerConfigService.createOrUpdateConfig(config);
 
-            // 4. Send test notification
+            // 5. Send test notification
             String testResult = partnerNotificationService.sendTestNotification(config);
 
             if ("SUCCESS".equals(testResult)) {
@@ -85,14 +91,24 @@ public class PartnerConfigController {
                     // Ignore errors from initial event dispatching
                 }
                 return ResponseEntity.ok(saved);
-            } else if (testResult.startsWith("SMTP_ERROR")) {
-                // Remove the configuration draft if test failed to ensure clean state
-                partnerConfigService.deleteConfig(config.getId(), user.getId());
-                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                        .body("❌ SMTP Configuration Error: " + testResult);
             } else {
-                partnerConfigService.deleteConfig(config.getId(), user.getId());
-                return ResponseEntity.badRequest().body("❌ Invalid Email Address: " + testResult);
+                if (isUpdate) {
+                    // Revert existing configuration back to its original valid state
+                    PartnerConfig revertConfig = existingOpt.get();
+                    revertConfig.setPartnerEmail(originalEmail);
+                    revertConfig.setEnabled(originalEnabled);
+                    partnerConfigService.createOrUpdateConfig(revertConfig);
+                } else {
+                    // Remove the configuration draft if it was new and test failed
+                    partnerConfigService.deleteConfig(config.getId(), user.getId());
+                }
+
+                if (testResult.startsWith("SMTP_ERROR")) {
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                            .body("❌ SMTP Configuration Error: " + testResult);
+                } else {
+                    return ResponseEntity.badRequest().body("❌ Invalid Email Address: " + testResult);
+                }
             }
         } catch (Throwable t) {
             t.printStackTrace();
