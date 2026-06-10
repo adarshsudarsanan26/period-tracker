@@ -1,0 +1,9 @@
+.git
+.gradle
+.idea
+.vscode
+build
+bin
+out
+*.class
+*.jar
