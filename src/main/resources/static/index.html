@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LunaFlow - Holistic Menstrual Companion</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js CDN -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="dark-mode">
+
+    <!-- Authentication Overlay (Modal) -->
+    <div class="auth-overlay" id="auth-overlay">
+        <div class="auth-card glass-card">
+            <div class="auth-header">
+                <div class="logo-icon"><i class="fa-solid fa-moon"></i></div>
+                <h2>LunaFlow</h2>
+                <p id="auth-subtitle">Sign in to your health companion</p>
+            </div>
+            
+            <!-- Login Form -->
+            <form id="login-form">
+                <div class="form-group">
+                    <label for="login-username">Email Address / Username</label>
+                    <input type="text" id="login-username" class="form-control" placeholder="e.g. test@example.com" required autocomplete="username">
+                </div>
+                <div class="form-group mt-15">
+                    <label for="login-password">Password</label>
+                    <input type="password" id="login-password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+                </div>
+                <div class="auth-error-msg" id="login-error"></div>
+                <button type="submit" class="primary-btn mt-20 w-100">Sign In</button>
+                <div class="auth-links mt-15" style="display: flex; flex-direction: column; gap: 8px;">
+                    <p class="auth-toggle-text">Don't have an account? <a href="#" id="toggle-to-register">Register here</a></p>
+                    <p class="auth-toggle-text"><a href="#" id="toggle-to-forgot">Forgot Password?</a></p>
+                </div>
+            </form>
+
+            <!-- Register Form (Hidden by default) -->
+            <form id="register-form" style="display: none;">
+                <div class="form-group">
+                    <label for="reg-name">Your Full Name</label>
+                    <input type="text" id="reg-name" class="form-control" placeholder="e.g. Adarsh" required autocomplete="name">
+                </div>
+                <div class="form-group mt-15">
+                    <label for="reg-username">Email Address</label>
+                    <input type="email" id="reg-username" class="form-control" placeholder="e.g. test@example.com" required autocomplete="username">
+                </div>
+                <div class="form-group mt-15">
+                    <label for="reg-password">Password</label>
+                    <input type="password" id="reg-password" class="form-control" placeholder="Minimum 6 characters" required autocomplete="new-password">
+                </div>
+                <div class="auth-error-msg" id="register-error"></div>
+                <button type="submit" class="primary-btn mt-20 w-100">Create Account</button>
+                <p class="auth-toggle-text mt-15">Already have an account? <a href="#" id="toggle-to-login">Sign in here</a></p>
+            </form>
+
+            <!-- Forgot Password Form (Hidden by default) -->
+            <form id="forgot-form" style="display: none;">
+                <div class="form-group">
+                    <label for="forgot-username">Email Address</label>
+                    <input type="email" id="forgot-username" class="form-control" placeholder="e.g. test@example.com" required autocomplete="username">
+                </div>
+                <div class="auth-error-msg" id="forgot-error"></div>
+                <div class="auth-success-msg" id="forgot-success" style="color: var(--normal-color); font-size: 13px; margin-top: 10px; text-align: left; font-weight: 500; line-height: 1.4;"></div>
+                <button type="submit" class="primary-btn mt-20 w-100">Send Reset Link</button>
+                <p class="auth-toggle-text mt-15">Back to <a href="#" id="toggle-forgot-to-login">Sign In</a></p>
+            </form>
+
+            <!-- Reset Password Form (Hidden by default) -->
+            <form id="reset-password-form" style="display: none;">
+                <div class="form-group">
+                    <label for="reset-new-password">New Password</label>
+                    <input type="password" id="reset-new-password" class="form-control" placeholder="Minimum 6 characters" required autocomplete="new-password">
+                </div>
+                <div class="form-group mt-15">
+                    <label for="reset-confirm-password">Confirm Password</label>
+                    <input type="password" id="reset-confirm-password" class="form-control" placeholder="Re-enter new password" required autocomplete="new-password">
+                </div>
+                <div class="auth-error-msg" id="reset-error"></div>
+                <div class="auth-success-msg" id="reset-success"></div>
+                <button type="submit" class="primary-btn mt-20 w-100">Update Password</button>
+                <p class="auth-toggle-text mt-15">Back to <a href="#" id="toggle-reset-to-login">Sign In</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Main Application Container -->
+    <div class="app-container" id="app-container" style="display: none;">
+        
+        <!-- Sidebar Navigation -->
+        <aside class="sidebar">
+            <div class="logo">
+                <div class="logo-icon"><i class="fa-solid fa-moon"></i></div>
+                <span class="logo-text">LunaFlow</span>
+            </div>
+            <nav class="nav-menu">
+                <button class="nav-item active" data-tab="dashboard">
+                    <i class="fa-solid fa-chart-simple"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-item" data-tab="log-entry">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>Log & Entry</span>
+                </button>
+                <button class="nav-item" data-tab="calendar-view">
+                    <i class="fa-solid fa-calendar-days"></i>
+                    <span>Calendar</span>
+                </button>
+                <button class="nav-item" data-tab="analytics">
+                    <i class="fa-solid fa-heart-pulse"></i>
+                    <span>Analytics</span>
+                </button>
+                <button class="nav-item" data-tab="settings">
+                    <i class="fa-solid fa-sliders"></i>
+                    <span>Settings</span>
+                </button>
+            </nav>
+            <div class="user-profile-summary">
+                <div class="avatar"><i class="fa-solid fa-user"></i></div>
+                <div class="user-info flex-grow">
+                    <h4 id="profile-summary-name">Adarsh</h4>
+                    <p>Standard Profile</p>
+                </div>
+                <button class="logout-btn" id="logout-btn" title="Sign Out">
+                    <i class="fa-solid fa-power-off"></i>
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Workspace Area -->
+        <main class="main-content">
+            <!-- Header bar -->
+            <header class="header">
+                <div class="welcome-msg">
+                    <h1 id="welcome-title">Hello, Adarsh</h1>
+                    <p>LunaFlow detects patterns across physical, mental, and lifestyle domains.</p>
+                </div>
+                <div class="header-actions">
+                    <!-- Partner Mode Toggle -->
+                    <div class="partner-toggle-container">
+                        <span class="partner-toggle-label"><i class="fa-solid fa-user-group mr-5"></i> Partner Mode</span>
+                        <label class="switch">
+                            <input type="checkbox" id="partner-mode-toggle">
+                            <span class="slider round"></span>
+                        </label>
+                    </div>
+                    <!-- Theme Toggle -->
+                    <button class="icon-btn" id="theme-toggle" title="Toggle Light/Dark Mode">
+                        <i class="fa-solid fa-sun" id="theme-icon"></i>
+                    </button>
+                    <!-- Notifications -->
+                    <div class="notifications-container">
+                        <button class="icon-btn" id="notification-btn" title="View Notifications">
+                            <i class="fa-solid fa-bell"></i>
+                            <span class="badge" id="notification-badge"></span>
+                        </button>
+                        <div class="notifications-dropdown" id="notifications-dropdown">
+                            <div class="notif-header">
+                                <h3>Notifications</h3>
+                                <button class="clear-notif-btn" id="clear-notifs">Dismiss All</button>
+                            </div>
+                            <div class="notif-list" id="notif-list">
+                                <div class="notif-empty">No alerts today</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </header>
+
+            <!-- Tab: Dashboard -->
+            <section class="tab-content active" id="dashboard">
+                <div class="dashboard-grid">
+                    
+                    <!-- Enhanced Phase Identity & Cycle Ring Card -->
+                    <div class="glass-card status-card phase-card" id="main-phase-card">
+                        <div class="card-glow" id="phase-card-glow"></div>
+                        
+                        <!-- Phase Badge & Heading -->
+                        <div class="phase-badge-container">
+                            <span class="phase-badge" id="phase-badge">Menstrual Phase</span>
+                        </div>
+                        
+                        <div class="phase-content-wrapper">
+                            <!-- Left: Circular Progress Ring -->
+                            <div class="circular-progress-container">
+                                <svg class="progress-ring" width="180" height="180">
+                                    <circle class="progress-ring__circle-bg" stroke="rgba(255,255,255,0.06)" stroke-width="10" fill="transparent" r="75" cx="90" cy="90"/>
+                                    <circle class="progress-ring__circle" id="progress-circle" stroke="#ff758c" stroke-width="10" stroke-dasharray="471.24" stroke-dashoffset="471.24" stroke-linecap="round" fill="transparent" r="75" cx="90" cy="90"/>
+                                </svg>
+                                <div class="progress-text">
+                                    <span class="cycle-day-label">Cycle Day</span>
+                                    <h2 id="cycle-day-value">--</h2>
+                                    <span class="days-remaining" id="days-remaining-value">-- days left</span>
+                                </div>
+                            </div>
+                            
+                            <!-- Right: Dynamic Phase Theme & Illustration -->
+                            <div class="phase-theme-details">
+                                <div class="phase-illustration-container">
+                                    <!-- Menstrual Illustration (Crescent Moon & Clouds) -->
+                                    <svg class="phase-illustration" id="illustration-menstrual" viewBox="0 0 100 100" style="display: none;">
+                                        <filter id="glow-menstrual"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                                        <path d="M40 20 A30 30 0 1 0 80 60 A22 22 0 1 1 40 20 Z" fill="#a18cd1" filter="url(#glow-menstrual)"/>
+                                        <ellipse cx="65" cy="70" rx="20" ry="10" fill="rgba(255,255,255,0.15)"/>
+                                        <ellipse cx="45" cy="75" rx="15" ry="8" fill="rgba(255,255,255,0.1)"/>
+                                        <circle cx="25" cy="35" r="1.5" fill="#fff" opacity="0.8"/>
+                                        <circle cx="75" cy="30" r="1" fill="#fff" opacity="0.5"/>
+                                        <circle cx="55" cy="15" r="2" fill="#fff" opacity="0.9"/>
+                                    </svg>
+                                    
+                                    <!-- Follicular Illustration (Growing Sprout) -->
+                                    <svg class="phase-illustration" id="illustration-follicular" viewBox="0 0 100 100" style="display: none;">
+                                        <filter id="glow-follicular"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                                        <path d="M50 85 C50 60 45 40 30 30" stroke="#10B981" stroke-width="4" fill="none" stroke-linecap="round"/>
+                                        <path d="M50 85 C50 65 55 50 70 45" stroke="#10B981" stroke-width="3" fill="none" stroke-linecap="round"/>
+                                        <path d="M30 30 C20 30 22 45 35 40 C35 40 33 32 30 30" fill="#34D399" filter="url(#glow-follicular)"/>
+                                        <path d="M70 45 C78 40 82 52 68 53 C68 53 66 47 70 45" fill="#34D399" filter="url(#glow-follicular)"/>
+                                        <circle cx="50" cy="85" r="6" fill="#059669"/>
+                                    </svg>
+                                    
+                                    <!-- Ovulation Illustration (Radiant Sun & Bloom) -->
+                                    <svg class="phase-illustration" id="illustration-ovulation" viewBox="0 0 100 100" style="display: none;">
+                                        <filter id="glow-ovulation"><feGaussianBlur stdDeviation="4" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                                        <circle cx="50" cy="50" r="18" fill="#F59E0B" filter="url(#glow-ovulation)"/>
+                                        <!-- Sun rays -->
+                                        <path d="M50 15 L50 25 M50 75 L50 85 M15 50 L25 50 M75 50 L85 50 M25 25 L32 32 M68 68 L75 75 M75 25 L68 32 M25 68 L32 68" stroke="#F59E0B" stroke-width="4" stroke-linecap="round" class="rotating-rays"/>
+                                        <!-- Blooming petals -->
+                                        <circle cx="50" cy="50" r="6" fill="#EF4444"/>
+                                    </svg>
+                                    
+                                    <!-- Luteal Illustration (Flickering Candle) -->
+                                    <svg class="phase-illustration" id="illustration-luteal" viewBox="0 0 100 100" style="display: none;">
+                                        <filter id="glow-luteal"><feGaussianBlur stdDeviation="3" result="coloredBlur"/><feMerge><feMergeNode in="coloredBlur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+                                        <!-- Candle body -->
+                                        <rect x="42" y="50" width="16" height="35" rx="3" fill="#EF4444"/>
+                                        <!-- Wick -->
+                                        <line x1="50" y1="50" x2="50" y2="44" stroke="#78350F" stroke-width="2"/>
+                                        <!-- Flame -->
+                                        <path d="M50 22 C55 32 57 44 50 44 C43 44 45 32 50 22 Z" fill="#F59E0B" filter="url(#glow-luteal)" class="flickering-flame"/>
+                                        <!-- Warm ring glow -->
+                                        <circle cx="50" cy="35" r="28" fill="none" stroke="rgba(245,158,11,0.15)" stroke-width="2" stroke-dasharray="4 4"/>
+                                    </svg>
+                                </div>
+                                <h3 id="phase-title">Loading Phase</h3>
+                                <p id="phase-quote">"Calculating current phase details..."</p>
+                            </div>
+                        </div>
+
+                        <div class="status-indicator mt-15">
+                            <span class="status-dot" id="status-dot">🟢</span>
+                            <span class="status-text" id="status-text">Normal</span>
+                        </div>
+                    </div>
+
+                    <!-- Prediction metrics cards -->
+                    <div class="glass-card metrics-card">
+                        <h3>Holistic Forecasts</h3>
+                        <div class="metrics-grid">
+                            <div class="metric-item">
+                                <div class="metric-icon period-color"><i class="fa-solid fa-droplet"></i></div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Next Period Expected</span>
+                                    <h4 id="forecast-period">--</h4>
+                                </div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-icon pms-color"><i class="fa-solid fa-sparkles"></i></div>
+                                <div class="metric-info">
+                                    <span class="metric-label">PMS Window</span>
+                                    <h4 id="forecast-pms">--</h4>
+                                </div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-icon fertile-color"><i class="fa-solid fa-seedling"></i></div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Fertile Window</span>
+                                    <h4 id="forecast-fertile">--</h4>
+                                </div>
+                            </div>
+                            <div class="metric-item">
+                                <div class="metric-icon ovulation-color"><i class="fa-solid fa-star"></i></div>
+                                <div class="metric-info">
+                                    <span class="metric-label">Estimated Ovulation</span>
+                                    <h4 id="forecast-ovulation">--</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Animated Cycle Progress Timeline Card -->
+                    <div class="glass-card cycle-timeline-card wide-card">
+                        <h3>Menstrual Cycle Timeline</h3>
+                        <div class="timeline-container">
+                            <div class="timeline-track">
+                                <div class="timeline-phase" id="phase-seg-menstrual" data-phase="MENSTRUAL">
+                                    <span class="phase-name">Menstrual Phase</span>
+                                    <span class="phase-days">Days 1-5</span>
+                                </div>
+                                <div class="timeline-phase" id="phase-seg-follicular" data-phase="FOLLICULAR">
+                                    <span class="phase-name">Follicular Phase</span>
+                                    <span class="phase-days">Days 6-12</span>
+                                </div>
+                                <div class="timeline-phase" id="phase-seg-ovulation" data-phase="OVULATION">
+                                    <span class="phase-name">Ovulation Phase</span>
+                                    <span class="phase-days">Days 13-15</span>
+                                </div>
+                                <div class="timeline-phase" id="phase-seg-luteal" data-phase="LUTEAL">
+                                    <span class="phase-name">Luteal Phase</span>
+                                    <span class="phase-days">Days 16-28</span>
+                                </div>
+                                
+                                <!-- Indicator Dot -->
+                                <div class="timeline-indicator" id="timeline-indicator">
+                                    <span class="timeline-indicator-glow"></span>
+                                    <span class="timeline-indicator-text" id="timeline-indicator-text">Day --</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="timeline-legend">
+                            <span><i class="fa-solid fa-bed text-indigo mr-5"></i> Rest & Calm</span>
+                            <span><i class="fa-solid fa-bolt text-teal mr-5"></i> Growth & Motivation</span>
+                            <span><i class="fa-solid fa-sun text-rose mr-5"></i> Radiance & Vitality</span>
+                            <span><i class="fa-solid fa-moon text-amber mr-5"></i> Introspection & Self-care</span>
+                        </div>
+                    </div>
+
+                    <!-- Partner Support & Insight Card -->
+                    <div class="glass-card partner-insight-card wide-card" id="partner-insight-card" style="display: none;">
+                        <div class="partner-header">
+                            <div class="partner-badge"><i class="fa-solid fa-user-group mr-5"></i> Partner Connection Guide</div>
+                            <h3>Active Cycle Support Strategies</h3>
+                        </div>
+                        <div class="partner-body">
+                            <div class="partner-insight-grid">
+                                <div class="partner-character-section">
+                                    <div class="character-avatar-container" id="user-dashboard-avatar-container">
+                                        <!-- Dynamic animated SVG character -->
+                                    </div>
+                                </div>
+                                <div class="partner-insight-section">
+                                    <h4><i class="fa-solid fa-circle-info mr-5"></i> Her Current Phase: <span id="partner-phase-name">--</span></h4>
+                                    <p id="partner-phase-explanation">Log details to view phase explanations and supportive relationship guidance.</p>
+                                </div>
+                                <div class="partner-insight-section">
+                                    <h4><i class="fa-solid fa-handshake-angle mr-5"></i> How to Support Her Today</h4>
+                                    <ul class="partner-strategies-list" id="partner-strategies-list">
+                                        <li>Enable Partner Mode and save daily logs to check custom recommendations.</li>
+                                    </ul>
+                                </div>
+                                <div class="partner-insight-section full-width-sec">
+                                    <h4><i class="fa-solid fa-comment-dots mr-5"></i> Safe Communication Cues</h4>
+                                    <div class="communication-cue-box" id="partner-communication-box">
+                                        "How can I support you best today? Do you need space, comfort, or help?"
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- AI Insights & Pattern Detector -->
+                    <div class="glass-card ai-insights-card wide-card">
+                        <div class="ai-header">
+                            <div class="ai-badge"><i class="fa-solid fa-brain mr-5"></i> AI Correlation Engine</div>
+                            <h3>Active Symptom & Lifestyle Patterns</h3>
+                        </div>
+                        <div class="patterns-list" id="ai-patterns-list">
+                            <!-- Populated dynamically -->
+                            <div class="pattern-item loading">Analyzing stored cycles...</div>
+                        </div>
+                    </div>
+
+                    <!-- Quick Daily Entry widget -->
+                    <div class="glass-card quick-log-card">
+                        <h3>Log Mood & Symptoms (Today)</h3>
+                        <form id="quick-log-form">
+                            <div class="mood-selector-container">
+                                <label>Daily Mood</label>
+                                <div class="mood-options">
+                                    <label class="mood-option">
+                                        <input type="radio" name="quick-mood" value="😊">
+                                        <span class="mood-emoji" title="Happy">😊</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="quick-mood" value="😐" checked>
+                                        <span class="mood-emoji" title="Normal">😐</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="quick-mood" value="😔">
+                                        <span class="mood-emoji" title="Sad">😔</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="quick-mood" value="😡">
+                                        <span class="mood-emoji" title="Angry">😡</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="quick-mood" value="😴">
+                                        <span class="mood-emoji" title="Tired">😴</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="quick-mood" value="🤐">
+                                        <span class="mood-emoji" title="Silent">🤐</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="symptom-checkboxes-container">
+                                <label>Quick Symptoms</label>
+                                <div class="symptom-chips">
+                                    <label class="symptom-chip">
+                                        <input type="checkbox" name="quick-symptoms" value="Cramps">
+                                        <span>Cramps</span>
+                                    </label>
+                                    <label class="symptom-chip">
+                                        <input type="checkbox" name="quick-symptoms" value="Headache">
+                                        <span>Headache</span>
+                                    </label>
+                                    <label class="symptom-chip">
+                                        <input type="checkbox" name="quick-symptoms" value="Bloating">
+                                        <span>Bloating</span>
+                                    </label>
+                                    <label class="symptom-chip">
+                                        <input type="checkbox" name="quick-symptoms" value="Mood swings">
+                                        <span>Mood Swings</span>
+                                    </label>
+                                    <label class="symptom-chip">
+                                        <input type="checkbox" name="quick-symptoms" value="Silent behavior">
+                                        <span>Silent Behavior</span>
+                                    </label>
+                                    <label class="symptom-chip">
+                                        <input type="checkbox" name="quick-symptoms" value="Anger">
+                                        <span>Anger</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-top: 15px;">
+                                <label for="quick-notes">Daily Notes</label>
+                                <input type="text" id="quick-notes" placeholder="e.g. Felt highly sensitive and avoided calls today" class="form-control">
+                            </div>
+
+                            <button type="submit" class="primary-btn mt-15 w-100">Save Log</button>
+                        </form>
+                    </div>
+
+                    <!-- Statistics Summary -->
+                    <div class="glass-card stat-summary-card">
+                        <h3>Averages & Trends</h3>
+                        <div class="averages-container">
+                            <div class="avg-box">
+                                <h2 id="avg-cycle-len-val">--</h2>
+                                <span>Cycle Length (days)</span>
+                            </div>
+                            <div class="avg-box">
+                                <h2 id="avg-period-dur-val">--</h2>
+                                <span>Period Duration (days)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Tab: Log & Entry -->
+            <section class="tab-content" id="log-entry">
+                <div class="log-entry-grid">
+                    
+                    <!-- Main Daily Logger -->
+                    <div class="glass-card logger-card">
+                        <h3>Detailed Holistic Daily Logger</h3>
+                        <form id="detailed-log-form">
+                            <div class="form-group">
+                                <label for="log-date">Select Date</label>
+                                <input type="date" id="log-date" class="form-control">
+                            </div>
+                            
+                            <!-- Mood Selector -->
+                            <div class="mood-selector-container mt-20">
+                                <label>Daily Mood</label>
+                                <div class="mood-options">
+                                    <label class="mood-option">
+                                        <input type="radio" name="detail-mood" value="😊">
+                                        <span class="mood-emoji">😊</span>
+                                        <span class="mood-label-text">Happy</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="detail-mood" value="😐" checked>
+                                        <span class="mood-emoji">😐</span>
+                                        <span class="mood-label-text">Normal</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="detail-mood" value="😔">
+                                        <span class="mood-emoji">😔</span>
+                                        <span class="mood-label-text">Sad</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="detail-mood" value="😡">
+                                        <span class="mood-emoji">😡</span>
+                                        <span class="mood-label-text">Angry</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="detail-mood" value="😴">
+                                        <span class="mood-emoji">😴</span>
+                                        <span class="mood-label-text">Tired</span>
+                                    </label>
+                                    <label class="mood-option">
+                                        <input type="radio" name="detail-mood" value="🤐">
+                                        <span class="mood-emoji">🤐</span>
+                                        <span class="mood-label-text">Silent</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Holistic Symptom Categorization -->
+                            <div class="holistic-symptoms-section mt-25">
+                                <h4>Symptoms Tracking (6 Domains)</h4>
+                                <p class="category-hint">* Click checked symptoms to view dynamic remedies, hydration, and partner support advices.</p>
+                                
+                                <!-- Category 1: Physical -->
+                                <div class="symptom-category-box mt-15">
+                                    <h5><i class="fa-solid fa-person-running mr-5"></i> 1. Physical Symptoms</h5>
+                                    <div class="symptom-checkbox-grid">
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Cramps"><span>Cramps</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Pelvic pain"><span>Pelvic Pain</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Lower back pain"><span>Lower Back Pain</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Headache"><span>Headache</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Migraine"><span>Migraine</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Breast tenderness"><span>Breast Tenderness</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Bloating"><span>Bloating</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Water retention"><span>Water Retention</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Fatigue"><span>Fatigue</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Dizziness"><span>Dizziness</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Nausea"><span>Nausea</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Acne"><span>Acne</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Oily skin"><span>Oily Skin</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Dry skin"><span>Dry Skin</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Hair fall"><span>Hair Fall</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Increased appetite"><span>Appetite Up</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Reduced appetite"><span>Appetite Down</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Food cravings"><span>Food Cravings</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Sleepiness"><span>Sleepiness</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Insomnia"><span>Insomnia</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Digestive issues"><span>Digestive Issues</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Constipation"><span>Constipation</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Diarrhea"><span>Diarrhea</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- Category 2: Emotional -->
+                                <div class="symptom-category-box mt-20">
+                                    <h5><i class="fa-solid fa-heart mr-5"></i> 2. Emotional Symptoms</h5>
+                                    <div class="symptom-checkbox-grid">
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Mood swings"><span>Mood Swings</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Irritability"><span>Irritability</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Anger"><span>Anger</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Emotional sensitivity"><span>Sensitivity</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Crying easily"><span>Crying Easily</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Feeling overwhelmed"><span>Overwhelmed</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Feeling lonely"><span>Lonely</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Feeling unsupported"><span>Unsupported</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Feeling insecure"><span>Insecure</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Frustration"><span>Frustration</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Jealousy"><span>Jealousy</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Emotional exhaustion"><span>Exhaustion</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Need for affection"><span>Need Affection</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Need for reassurance"><span>Need Reassurance</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- Category 3: Mental & Cognitive -->
+                                <div class="symptom-category-box mt-20">
+                                    <h5><i class="fa-solid fa-brain mr-5"></i> 3. Mental & Cognitive</h5>
+                                    <div class="symptom-checkbox-grid">
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Brain fog"><span>Brain Fog</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Poor concentration"><span>Poor Focus</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Forgetfulness"><span>Forgetfulness</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Difficulty making decisions"><span>Indecision</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Overthinking"><span>Overthinking</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Anxiety"><span>Anxiety</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Racing thoughts"><span>Racing Thoughts</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Reduced productivity"><span>Low Productivity</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Mental fatigue"><span>Mental Fatigue</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Reduced motivation"><span>Low Motivation</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- Category 4: Behavioral Changes -->
+                                <div class="symptom-category-box mt-20">
+                                    <h5><i class="fa-solid fa-masks-theater mr-5"></i> 4. Behavioral Changes</h5>
+                                    <div class="symptom-checkbox-grid">
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Silent behavior"><span>Silent Behavior</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Social withdrawal"><span>Social Withdrawal</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Reduced communication"><span>Less Talking</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Increased argument tendency"><span>Argumentative</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Avoiding people"><span>Avoiding People</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Staying in bed more"><span>Staying in Bed</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Increased phone usage"><span>Phone Usage Up</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Emotional shutdown"><span>Shutdown</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Reduced interest in hobbies"><span>Low Interest</span></label>
+                                    </div>
+                                </div>
+
+                                <!-- Category 6: Relationship & Social (Symptom categories 5/6 mapped) -->
+                                <div class="symptom-category-box mt-20">
+                                    <h5><i class="fa-solid fa-people-arrows mr-5"></i> 5. Relationship & Social Dynamics</h5>
+                                    <div class="symptom-checkbox-grid">
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Need for space"><span>Need Space</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Need for comfort"><span>Need Comfort</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Need for attention"><span>Need Attention</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Relationship conflicts"><span>Conflicts</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Increased sensitivity during conversations"><span>Conversational Sensitivity</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Feeling misunderstood"><span>Misunderstood</span></label>
+                                        <label class="checkbox-tag"><input type="checkbox" name="detail-symptoms" value="Feeling emotionally distant"><span>Distant</span></label>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Category 5: Lifestyle Tracking -->
+                            <div class="lifestyle-section mt-25">
+                                <h4>6. Lifestyle Tracking</h4>
+                                <div class="lifestyle-inputs-grid mt-15">
+                                    <div class="form-group">
+                                        <label for="life-sleep-duration">Sleep Duration (hours)</label>
+                                        <input type="number" step="0.5" min="0" max="24" id="life-sleep-duration" class="form-control" placeholder="e.g. 7.5">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="life-sleep-quality">Sleep Quality</label>
+                                        <select id="life-sleep-quality" class="form-control">
+                                            <option value="">-- Select --</option>
+                                            <option value="Poor">Poor 😔</option>
+                                            <option value="Fair">Fair 😐</option>
+                                            <option value="Good">Good 😊</option>
+                                            <option value="Excellent">Excellent 🌟</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="life-water">Water Intake (liters)</label>
+                                        <input type="number" step="0.1" min="0" max="10" id="life-water" class="form-control" placeholder="e.g. 2.0">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="life-exercise">Exercise Duration (mins)</label>
+                                        <input type="number" min="0" max="360" id="life-exercise" class="form-control" placeholder="e.g. 30">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="life-steps">Walking (steps)</label>
+                                        <input type="number" min="0" max="100000" id="life-steps" class="form-control" placeholder="e.g. 6000">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="life-diet">Diet Quality</label>
+                                        <select id="life-diet" class="form-control">
+                                            <option value="">-- Select --</option>
+                                            <option value="Poor">Poor (Processed/Sugar)</option>
+                                            <option value="Fair">Fair (Mixed)</option>
+                                            <option value="Good">Good (Whole Foods)</option>
+                                            <option value="Excellent">Excellent (Balanced/Nutritious)</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="life-caffeine">Caffeine Intake (cups)</label>
+                                        <input type="number" min="0" max="20" id="life-caffeine" class="form-control" placeholder="e.g. 2">
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="life-alcohol">Alcohol Intake (units)</label>
+                                        <input type="number" min="0" max="20" id="life-alcohol" class="form-control" placeholder="e.g. 0">
+                                    </div>
+                                </div>
+                                
+                                <div class="sliders-grid mt-15">
+                                    <div class="form-group">
+                                        <label class="slider-label"><span>Stress Level</span> <strong id="val-stress">3</strong></label>
+                                        <input type="range" min="1" max="5" id="life-stress" class="slider-control" value="3">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="slider-label"><span>Workload</span> <strong id="val-workload">3</strong></label>
+                                        <input type="range" min="1" max="5" id="life-workload" class="slider-control" value="3">
+                                    </div>
+                                    <div class="form-group">
+                                        <label class="slider-label"><span>Energy Level</span> <strong id="val-energy">3</strong></label>
+                                        <input type="range" min="1" max="5" id="life-energy" class="slider-control" value="3">
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group mt-20">
+                                <label for="detail-notes">Notes & Thoughts</label>
+                                <textarea id="detail-notes" rows="4" class="form-control" placeholder="Write down notes, emotional stamina detail, relationship patterns, etc."></textarea>
+                            </div>
+
+                            <button type="submit" class="primary-btn mt-25 w-100">Save Daily Entry</button>
+                        </form>
+                    </div>
+
+                    <!-- Cycle Logs (Start & End dates) -->
+                    <div class="glass-card cycle-logger-card">
+                        <h3>Log a Period Cycle</h3>
+                        <form id="period-log-form">
+                            <div class="form-row">
+                                <div class="form-group flex-1">
+                                    <label for="period-start">Start Date</label>
+                                    <input type="date" id="period-start" class="form-control" required>
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label for="period-end">End Date (Optional)</label>
+                                    <input type="date" id="period-end" class="form-control">
+                                </div>
+                            </div>
+                            <button type="submit" class="primary-btn mt-20 w-100">Log Period Cycle</button>
+                        </form>
+
+                        <div class="logged-cycles-section mt-30">
+                            <h3>Logged Cycles</h3>
+                            <div class="table-container">
+                                <table class="cycles-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Start Date</th>
+                                            <th>End Date</th>
+                                            <th>Duration</th>
+                                            <th>Status</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="cycles-table-body">
+                                        <tr>
+                                            <td colspan="4" style="text-align: center; color: var(--text-muted)">No cycles logged yet</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Tab: Calendar -->
+            <section class="tab-content" id="calendar-view">
+                <div class="calendar-layout-grid">
+                    
+                    <!-- Main Calendar Card -->
+                    <div class="glass-card calendar-card">
+                        <div class="calendar-header">
+                            <button class="icon-btn" id="prev-month-btn"><i class="fa-solid fa-chevron-left"></i></button>
+                            <h2 id="calendar-month-year">--</h2>
+                            <button class="icon-btn" id="next-month-btn"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="calendar-weekdays">
+                            <div>Sun</div>
+                            <div>Mon</div>
+                            <div>Tue</div>
+                            <div>Wed</div>
+                            <div>Thu</div>
+                            <div>Fri</div>
+                            <div>Sat</div>
+                        </div>
+                        <div class="calendar-days-grid" id="calendar-days-grid">
+                            <!-- Dynamic days populated in JS -->
+                        </div>
+                        
+                        <!-- Legend -->
+                        <div class="calendar-legend">
+                            <div class="legend-item"><span class="legend-dot period-color-bg"></span>Period</div>
+                            <div class="legend-item"><span class="legend-dot period-pred-color-bg"></span>Predicted Period</div>
+                            <div class="legend-item"><span class="legend-dot pms-color-bg"></span>PMS Window</div>
+                            <div class="legend-item"><span class="legend-dot fertile-color-bg"></span>Fertile Window</div>
+                            <div class="legend-item"><span class="legend-dot ovulation-color-bg"><i class="fa-solid fa-star" style="font-size: 8px;"></i></span>Ovulation Day</div>
+                        </div>
+                    </div>
+
+                    <!-- Daily Details Card -->
+                    <div class="glass-card day-details-card">
+                        <h3>Details for <span id="selected-day-title">Today</span></h3>
+                        <div class="day-details-content" id="day-details-content">
+                            <p class="empty-state">Select a day on the calendar to view logs.</p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Tab: Analytics -->
+            <section class="tab-content" id="analytics">
+                <div class="analytics-grid">
+                    
+                    <!-- Mood Trend Card -->
+                    <div class="glass-card chart-card wide-chart">
+                        <h3>Mood Trends (Last 30 Days)</h3>
+                        <div class="chart-container">
+                            <canvas id="moodChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Symptom Frequencies -->
+                    <div class="glass-card chart-card">
+                        <h3>Symptom Frequency</h3>
+                        <div class="chart-container">
+                            <canvas id="symptomChart"></canvas>
+                        </div>
+                    </div>
+
+                    <!-- Cycle Lengths -->
+                    <div class="glass-card chart-card">
+                        <h3>Cycle Length History</h3>
+                        <div class="chart-container">
+                            <canvas id="cycleChart"></canvas>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+            <!-- Tab: Settings -->
+            <section class="tab-content" id="settings">
+                <div class="settings-layout-grid">
+                    
+                    <div class="glass-card settings-card">
+                        <h3>User Settings</h3>
+                        <form id="settings-form">
+                            <div class="form-group">
+                                <label for="settings-name">Name</label>
+                                <input type="text" id="settings-name" class="form-control" required autocomplete="name">
+                            </div>
+                            <div class="form-row mt-20">
+                                <div class="form-group flex-1">
+                                    <label for="settings-cycle-length">Default Cycle Length (days)</label>
+                                    <input type="number" id="settings-cycle-length" class="form-control" min="15" max="45" required>
+                                </div>
+                                <div class="form-group flex-1">
+                                    <label for="settings-period-duration">Default Period Duration (days)</label>
+                                    <input type="number" id="settings-period-duration" class="form-control" min="1" max="15" required>
+                                </div>
+                            </div>
+                            <button type="submit" class="primary-btn mt-30 w-100">Save Preferences</button>
+                        </form>
+                    </div>
+
+                    <div class="glass-card data-management-card">
+                        <h3>Reports & Database</h3>
+                        <p class="info-text">Export your cycle reports or view database diagnostic information.</p>
+                        
+                        <div class="actions-list mt-20">
+                            <a href="/api/reports/export" class="secondary-btn w-100 text-center" download>
+                                <i class="fa-solid fa-file-export mr-10"></i> Export All Data (CSV)
+                            </a>
+                            
+                            <hr class="divider mt-20 mb-20">
+                            
+                            <h4>Database Configuration</h4>
+                            <div class="db-badge">
+                                <i class="fa-solid fa-database mr-10"></i> H2 File-Persisted Database
+                            </div>
+                            <p class="description mt-10">
+                                LunaFlow stores records locally. Data persists across restarts under the local <code>./db/</code> directory.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Slide-out Remedy & Partner Support Drawer -->
+        <div class="remedy-drawer-overlay" id="remedy-drawer-overlay">
+            <div class="remedy-drawer" id="remedy-drawer">
+                <div class="drawer-header">
+                    <div class="drawer-header-left">
+                        <span class="drawer-badge" id="remedy-badge">Physical</span>
+                        <h3 id="remedy-symptom-name">Cramps</h3>
+                    </div>
+                    <button class="icon-btn close-drawer-btn" id="close-remedy-drawer">
+                        <i class="fa-solid fa-xmark"></i>
+                    </button>
+                </div>
+                
+                <div class="drawer-body">
+                    <!-- Dynamic sections loaded in JS based on category -->
+                    <div class="drawer-section">
+                        <h4><i class="fa-solid fa-circle-question mr-5"></i> Why It Happens</h4>
+                        <p id="remedy-why">...</p>
+                    </div>
+
+                    <div class="drawer-section mt-20" id="section-remedies">
+                        <h4><i class="fa-solid fa-capsules mr-5"></i> Recommended Remedies</h4>
+                        <p id="remedy-rem">...</p>
+                    </div>
+
+                    <div class="drawer-section mt-20" id="section-hydration">
+                        <h4><i class="fa-solid fa-glass-water mr-5"></i> Hydration & Diet Suggestions</h4>
+                        <p id="remedy-hydro">...</p>
+                    </div>
+
+                    <div class="drawer-section mt-20" id="section-exercise">
+                        <h4><i class="fa-solid fa-dumbbell mr-5"></i> Exercise Recommendations</h4>
+                        <p id="remedy-exercise">...</p>
+                    </div>
+
+                    <div class="drawer-section mt-20" id="section-recovery">
+                        <h4><i class="fa-solid fa-bed mr-5"></i> Recovery & Sleep Tips</h4>
+                        <p id="remedy-recovery">...</p>
+                    </div>
+
+                    <!-- Emotional / Partner Dynamic advice sections -->
+                    <div class="drawer-section mt-20" id="section-selfcare" style="display: none;">
+                        <h4><i class="fa-solid fa-spa mr-5"></i> Self-Care Suggestions</h4>
+                        <p id="remedy-selfcare">...</p>
+                    </div>
+
+                    <div class="drawer-section mt-20" id="section-partner" style="display: none;">
+                        <h4><i class="fa-solid fa-handshake-angle mr-5"></i> Partner Support Strategies</h4>
+                        <div class="partner-card" id="remedy-partner">
+                            <!-- Populated with points -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- End Period Modal (Popup) -->
+    <div class="modal-overlay" id="end-period-modal" style="display: none;">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-calendar-check mr-10 period-color"></i>End Menstrual Period</h3>
+                <button class="icon-btn close-modal-btn" id="close-end-modal" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="end-period-form" class="mt-20">
+                <input type="hidden" id="end-period-id">
+                
+                <div class="form-group">
+                    <label>Period Start Date</label>
+                    <input type="text" id="end-period-start-display" class="form-control" disabled>
+                </div>
+                
+                <div class="form-group mt-15">
+                    <label for="end-period-date">Select End Date</label>
+                    <input type="date" id="end-period-date" class="form-control" required>
+                    <p class="form-help-text mt-5" style="font-size: 11px; color: var(--text-muted);">* Please enter the date the bleeding stopped.</p>
+                </div>
+                
+                <div class="auth-error-msg" id="end-period-error"></div>
+                
+                <div class="modal-footer mt-25">
+                    <button type="submit" class="primary-btn w-100">Confirm & Save Cycle</button>
+                </div>
+            </form>
+        </div>
+        </div>
+    </div>
+
+    <!-- Partner Mode Setup Modal -->
+    <div class="modal-overlay" id="partner-setup-modal" style="display: none;">
+        <div class="modal-card glass-card">
+            <div class="modal-header">
+                <h3><i class="fa-solid fa-user-group mr-10 text-rose"></i>Partner Connection Setup</h3>
+                <button class="icon-btn close-modal-btn" id="close-partner-modal" title="Close">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            
+            <div class="partner-modal-body mt-15">
+                <p class="description-text mb-20" style="font-size: 13.5px; color: var(--text-muted); line-height: 1.5;">
+                    Simplify your connection. Provide your partner's email address to send a visual card notification and activate their live dashboard. We'll automatically use your registered account email to identify you.
+                </p>
+                
+                <form id="partner-setup-form">
+                    <div class="form-group">
+                        <label for="partner-email-input">Partner Email Address</label>
+                        <input type="email" id="partner-email-input" class="form-control" placeholder="e.g. partner@example.com" required>
+                    </div>
+                    
+                    <!-- Status Display Box -->
+                    <div class="partner-status-box mt-20" id="partner-status-box" style="display: none;">
+                        <div class="status-loader" id="partner-status-loader" style="display: none;">
+                            <span class="spinner"></span> <span class="status-loader-text">Validating email & sending test message...</span>
+                        </div>
+                        <div class="status-result" id="partner-status-result"></div>
+                    </div>
+                    
+                    <!-- Dashboard Link Box (Shown when successfully connected) -->
+                    <div class="partner-dashboard-box mt-25" id="partner-dashboard-box" style="display: none;">
+                        <label>Secure Dashboard Link</label>
+                        <div class="copy-link-container mt-5" style="display: flex; gap: 10px;">
+                            <input type="text" id="partner-dashboard-url" class="form-control" readonly style="flex: 1;">
+                            <button type="button" class="primary-btn copy-btn" id="copy-dashboard-btn" style="white-space: nowrap; width: auto; padding: 0 16px;">Copy Link</button>
+                            <button type="button" class="primary-btn" id="open-dashboard-btn" style="white-space: nowrap; width: auto; padding: 0 16px; background: #5e5ce6;">Open View</button>
+                        </div>
+                        <p class="form-help-text mt-10" style="font-size: 12px; color: var(--text-muted);">* Share this link with your partner to let them view your cycle progress and animated mood character.</p>
+                    </div>
+
+                    <div class="modal-footer mt-25">
+                        <button type="submit" class="primary-btn w-100" id="partner-submit-btn">Save & Connect Partner</button>
+                        <button type="button" class="secondary-btn w-100 mt-10" id="partner-disconnect-btn" style="display: none; background: rgba(234, 130, 130, 0.1); color: #ff7676; border-color: rgba(255, 0, 0, 0.17);">Disconnect Partner</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Partner Dashboard View Container (Hidden by default, used for single-tab experience) -->
+    <div class="partner-dashboard-container" id="partner-dashboard-view" style="display: none; padding: 20px; max-width: 1200px; margin: 0 auto;">
+        <!-- Header -->
+        <header class="partner-dashboard-header" style="display: flex; justify-content: space-between; align-items: center;">
+            <div class="brand">
+                <span class="brand-logo"><i class="fa-solid fa-moon"></i></span>
+                <span class="brand-name">LunaFlow</span>
+                <span class="brand-divider">|</span>
+                <span class="brand-sub">Partner Hub</span>
+            </div>
+            <div style="display: flex; gap: 15px; align-items: center;">
+                <button id="partner-back-btn" class="secondary-btn" style="display: none; font-size: 13px; padding: 8px 16px; width: auto; margin: 0; background: rgba(255, 255, 255, 0.08); border-color: rgba(255, 255, 255, 0.15); color: #fff;">
+                    <i class="fa-solid fa-arrow-left mr-5"></i> Back to App
+                </button>
+                <div class="live-status-indicator">
+                    <span class="live-pulse"></span> Live Sync Active
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <main class="partner-dashboard-main mt-30">
+            <div class="partner-dashboard-grid">
+                
+                <!-- Center Column: Centerpiece Animated Character Card -->
+                <div class="glass-card partner-character-card text-center">
+                    <div class="card-glow" id="character-card-glow"></div>
+                    <div class="partner-badge-container">
+                        <span class="partner-badge" id="partner-user-name">Loading Profile...</span>
+                    </div>
+                    
+                    <div class="centerpiece-avatar-wrapper mt-25">
+                        <div class="character-avatar-container large-avatar" id="partner-dashboard-avatar-container">
+                            <!-- Dynamic Animated SVG character -->
+                            <div class="avatar-placeholder">
+                                <span class="spinner"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h2 class="mt-20" id="partner-display-mood-emoji">😌</h2>
+                    <h3 class="partner-avatar-status" id="partner-display-mood-text">Loading mood...</h3>
+                    <p class="partner-avatar-desc mt-10" id="partner-display-phase">Calculating current cycle details...</p>
+                </div>
+
+                <!-- Right Column: Status Cards and Support Cues -->
+                <div class="partner-metrics-column">
+                    <!-- Cycle Progress Card -->
+                    <div class="glass-card partner-progress-card">
+                        <h3>Cycle Progress</h3>
+                        <div class="progress-details mt-20">
+                            <div class="progress-labels">
+                                <span class="days-indicator" id="partner-days-value">Day --</span>
+                                <span class="days-left" id="partner-days-left">-- days left</span>
+                            </div>
+                            <div class="progress-bar-container mt-10">
+                                <div class="progress-bar-fill" id="partner-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Grid -->
+                    <div class="partner-status-grid mt-20">
+                        <div class="glass-card status-cell">
+                            <div class="cell-icon text-indigo"><i class="fa-solid fa-bolt"></i></div>
+                            <div class="cell-info">
+                                <span class="cell-label">Energy Level</span>
+                                <h4 id="partner-energy-val">--</h4>
+                            </div>
+                        </div>
+                        <div class="glass-card status-cell">
+                            <div class="cell-icon text-teal" id="partner-wellness-icon"><i class="fa-solid fa-heart"></i></div>
+                            <div class="cell-info">
+                                <span class="cell-label">Wellness Index</span>
+                                <h4 id="partner-wellness-val">--</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Support Suggestion Card -->
+                    <div class="glass-card partner-support-card mt-20">
+                        <div class="support-header">
+                            <span class="support-icon"><i class="fa-solid fa-handshake-angle"></i></span>
+                            <h3>Suggested Support</h3>
+                        </div>
+                        <div class="support-content mt-15" id="partner-support-suggestion">
+                            Enable daily logs to unlock custom support recommendations and relationship insights.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+    </div>
+
+    <!-- Main JS Application script -->
+    <script src="app.js"></script>
+
+    <footer class="site-footer">
+        <p>&copy; 2026 LunaFlow &nbsp;&bull;&nbsp; Developed by <strong>Adarsh Sudarsanan</strong> &nbsp;&bull;&nbsp; <a href="mailto:adarshaadhi2255@gmail.com">adarshaadhi2255@gmail.com</a></p>
+    </footer>
+</body>
+</html>

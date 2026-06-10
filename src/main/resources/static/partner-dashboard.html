@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>LunaFlow Partner Dashboard</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&family=Plus+Jakarta+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Main Style Sheet (served from root) -->
+    <link rel="stylesheet" href="/styles.css">
+</head>
+<body class="dark-mode partner-dashboard-body">
+    <div class="partner-dashboard-container">
+        <!-- Header -->
+        <header class="partner-dashboard-header">
+            <div class="brand">
+                <span class="brand-logo"><i class="fa-solid fa-moon"></i></span>
+                <span class="brand-name">LunaFlow</span>
+                <span class="brand-divider">|</span>
+                <span class="brand-sub">Partner Hub</span>
+            </div>
+            <div class="live-status-indicator">
+                <span class="live-pulse"></span> Live Sync Active
+            </div>
+        </header>
+
+        <!-- Main Layout -->
+        <main class="partner-dashboard-main mt-30">
+            <div class="partner-dashboard-grid">
+                
+                <!-- Center Column: Centerpiece Animated Character Card -->
+                <div class="glass-card partner-character-card text-center">
+                    <div class="card-glow" id="character-card-glow"></div>
+                    <div class="partner-badge-container">
+                        <span class="partner-badge" id="partner-user-name">Loading Profile...</span>
+                    </div>
+                    
+                    <div class="centerpiece-avatar-wrapper mt-25">
+                        <div class="character-avatar-container large-avatar" id="partner-dashboard-avatar-container">
+                            <!-- Dynamic Animated SVG character -->
+                            <div class="avatar-placeholder">
+                                <span class="spinner"></span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h2 class="mt-20" id="partner-display-mood-emoji">😌</h2>
+                    <h3 class="partner-avatar-status" id="partner-display-mood-text">Loading mood...</h3>
+                    <p class="partner-avatar-desc mt-10" id="partner-display-phase">Calculating current cycle details...</p>
+                </div>
+
+                <!-- Right Column: Status Cards and Support Cues -->
+                <div class="partner-metrics-column">
+                    <!-- Cycle Progress Card -->
+                    <div class="glass-card partner-progress-card">
+                        <h3>Cycle Progress</h3>
+                        <div class="progress-details mt-20">
+                            <div class="progress-labels">
+                                <span class="days-indicator" id="partner-days-value">Day --</span>
+                                <span class="days-left" id="partner-days-left">-- days left</span>
+                            </div>
+                            <div class="progress-bar-container mt-10">
+                                <div class="progress-bar-fill" id="partner-progress-fill" style="width: 0%;"></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Status Grid -->
+                    <div class="partner-status-grid mt-20">
+                        <div class="glass-card status-cell">
+                            <div class="cell-icon text-indigo"><i class="fa-solid fa-bolt"></i></div>
+                            <div class="cell-info">
+                                <span class="cell-label">Energy Level</span>
+                                <h4 id="partner-energy-val">--</h4>
+                            </div>
+                        </div>
+                        <div class="glass-card status-cell">
+                            <div class="cell-icon text-teal" id="partner-wellness-icon"><i class="fa-solid fa-heart"></i></div>
+                            <div class="cell-info">
+                                <span class="cell-label">Wellness Index</span>
+                                <h4 id="partner-wellness-val">--</h4>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Visual Support Suggestion Card -->
+                    <div class="glass-card partner-support-card mt-20">
+                        <div class="support-header">
+                            <span class="support-icon"><i class="fa-solid fa-handshake-angle"></i></span>
+                            <h3>Suggested Support</h3>
+                        </div>
+                        <div class="support-content mt-15" id="partner-support-suggestion">
+                            Enable daily logs to unlock custom support recommendations and relationship insights.
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </main>
+
+        <footer class="partner-dashboard-footer mt-40">
+            <p>© 2026 LunaFlow • Visual Emotional Connection Hub</p>
+            <p class="footer-credit">Developed by <strong>Adarsh Sudarsanan</strong> &nbsp;•&nbsp; <a href="mailto:adarshaadhi2255@gmail.com">adarshaadhi2255@gmail.com</a></p>
+        </footer>
+    </div>
+
+    <!-- Partner Dashboard Script (served from root) -->
+    <script src="/app-partner.js"></script>
+</body>
+</html>
