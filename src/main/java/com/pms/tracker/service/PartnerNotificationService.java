@@ -29,6 +29,13 @@ public class PartnerNotificationService {
         this.notificationRepository = notificationRepository;
     }
 
+    private boolean isSmtpConfigured() {
+        String smtpUser = env.getProperty("spring.mail.username");
+        String smtpPass = env.getProperty("spring.mail.password");
+        return smtpUser != null && !smtpUser.isBlank() && !smtpUser.contains("${")
+                && smtpPass != null && !smtpPass.isBlank() && !smtpPass.contains("${");
+    }
+
     /**
      * Sends a test email notification using the partner configuration.
      * Returns a status string (e.g. "SUCCESS", "SMTP_ERROR: error details", or syntax validation error).
@@ -38,11 +45,10 @@ public class PartnerNotificationService {
         if (to == null || to.isBlank()) {
             return "No email address configured.";
         }
-        String smtpUser = env.getProperty("spring.mail.username");
-        String smtpPass = env.getProperty("spring.mail.password");
-        if (smtpUser == null || smtpPass == null || smtpUser.isBlank() || smtpPass.isBlank()) {
+        if (!isSmtpConfigured()) {
             return "SMTP_ERROR: Credentials not configured in environment variables.";
         }
+        String smtpUser = env.getProperty("spring.mail.username");
         if ("mock@example.com".equalsIgnoreCase(smtpUser)) {
             PartnerNotification notif = new PartnerNotification();
             notif.setPartnerConfig(config);
@@ -99,11 +105,10 @@ public class PartnerNotificationService {
         String to = config.getPartnerEmail();
         if (to == null || to.isBlank()) return;
         
-        String smtpUser = env.getProperty("spring.mail.username");
-        String smtpPass = env.getProperty("spring.mail.password");
-        if (smtpUser == null || smtpPass == null || smtpUser.isBlank() || smtpPass.isBlank()) {
+        if (!isSmtpConfigured()) {
             return;
         }
+        String smtpUser = env.getProperty("spring.mail.username");
         if ("mock@example.com".equalsIgnoreCase(smtpUser)) {
             PartnerNotification notif = new PartnerNotification(config, eventTitle, "SUCCESS", "MOCK: Visual card update successfully bypassed for " + to);
             notificationRepository.save(notif);
