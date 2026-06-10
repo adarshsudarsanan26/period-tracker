@@ -48,50 +48,59 @@ public class PartnerConfigController {
 
     @PostMapping("/config")
     public ResponseEntity<?> createOrUpdate(@RequestBody PartnerConfig request) {
-        User user = getLoggedInUser();
-        
-        // 1. Basic validation of email
-        String email = request.getPartnerEmail();
-        if (email == null || email.isBlank()) {
-            return ResponseEntity.badRequest().body("❌ Invalid Email Address");
-        }
-        if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
-            return ResponseEntity.badRequest().body("❌ Invalid Email Address");
-        }
-
-        // 2. Prepare partner config
-        PartnerConfig config = new PartnerConfig();
-        config.setUserId(user.getId());
-        config.setPartnerEmail(email);
-        config.setEnabled(false); // Enable ONLY if test notification succeeds!
-
-        // 3. Save draft to get/generate details
-        config = partnerConfigService.createOrUpdateConfig(config);
-
-        // 4. Send test notification
-        String testResult = partnerNotificationService.sendTestNotification(config);
-
-        if ("SUCCESS".equals(testResult)) {
-            // Test notification succeeded! Mark enabled
-            config.setEnabled(true);
-            PartnerConfig saved = partnerConfigService.createOrUpdateConfig(config);
+        try {
+            User user = getLoggedInUser();
             
-            // Trigger "Partner Mode Enabled" event update immediately
-            try {
-                java.util.Map<String, Object> summary = partnerConfigService.getCompactSummary(saved.getId());
-                partnerNotificationService.sendEventUpdate(saved, user.getUsername(), "Partner Mode Enabled", summary);
-            } catch (Exception e) {
-                // Ignore errors from initial event dispatching
+            // 1. Basic validation of email
+            String email = request.getPartnerEmail();
+            if (email == null || email.isBlank()) {
+                return ResponseEntity.badRequest().body("❌ Invalid Email Address");
             }
-            return ResponseEntity.ok(saved);
-        } else if (testResult.startsWith("SMTP_ERROR")) {
-            // Remove the configuration draft if test failed to ensure clean state
-            partnerConfigService.deleteConfig(config.getId(), user.getId());
+            if (!email.matches("^[\\w-\\.]+@([\\w-]+\\.)+[\\w-]{2,4}$")) {
+                return ResponseEntity.badRequest().body("❌ Invalid Email Address");
+            }
+
+            // 2. Prepare partner config
+            PartnerConfig config = new PartnerConfig();
+            config.setUserId(user.getId());
+            config.setPartnerEmail(email);
+            config.setEnabled(false); // Enable ONLY if test notification succeeds!
+
+            // 3. Save draft to get/generate details
+            config = partnerConfigService.createOrUpdateConfig(config);
+
+            // 4. Send test notification
+            String testResult = partnerNotificationService.sendTestNotification(config);
+
+            if ("SUCCESS".equals(testResult)) {
+                // Test notification succeeded! Mark enabled
+                config.setEnabled(true);
+                PartnerConfig saved = partnerConfigService.createOrUpdateConfig(config);
+                
+                // Trigger "Partner Mode Enabled" event update immediately
+                try {
+                    java.util.Map<String, Object> summary = partnerConfigService.getCompactSummary(saved.getId());
+                    partnerNotificationService.sendEventUpdate(saved, user.getUsername(), "Partner Mode Enabled", summary);
+                } catch (Exception e) {
+                    // Ignore errors from initial event dispatching
+                }
+                return ResponseEntity.ok(saved);
+            } else if (testResult.startsWith("SMTP_ERROR")) {
+                // Remove the configuration draft if test failed to ensure clean state
+                partnerConfigService.deleteConfig(config.getId(), user.getId());
+                return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                        .body("❌ SMTP Configuration Error: " + testResult);
+            } else {
+                partnerConfigService.deleteConfig(config.getId(), user.getId());
+                return ResponseEntity.badRequest().body("❌ Invalid Email Address: " + testResult);
+            }
+        } catch (Throwable t) {
+            t.printStackTrace();
+            java.io.StringWriter sw = new java.io.StringWriter();
+            java.io.PrintWriter pw = new java.io.PrintWriter(sw);
+            t.printStackTrace(pw);
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("❌ SMTP Configuration Error");
-        } else {
-            partnerConfigService.deleteConfig(config.getId(), user.getId());
-            return ResponseEntity.badRequest().body("❌ Invalid Email Address");
+                    .body("❌ Unexpected Server Error: " + t.getMessage() + "\nStacktrace:\n" + sw.toString());
         }
     }
 

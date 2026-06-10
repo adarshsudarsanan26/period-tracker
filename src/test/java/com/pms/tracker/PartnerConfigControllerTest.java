@@ -54,6 +54,8 @@ public class PartnerConfigControllerTest {
                 .andReturn();
 
         assertEquals(500, result.getResponse().getStatus());
-        assertEquals("❌ SMTP Configuration Error", result.getResponse().getContentAsString());
+        org.junit.jupiter.api.Assertions.assertTrue(
+                result.getResponse().getContentAsString().startsWith("❌ SMTP Configuration Error")
+        );
     }
 }
