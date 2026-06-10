@@ -1,6 +1,6 @@
 // LunaFlow Application JavaScript
 
-const API_BASE = (window.location.protocol === 'file:' || window.location.port !== '8080')
+const API_BASE = (window.location.protocol === 'file:' || (['localhost', '127.0.0.1', '[::1]'].includes(window.location.hostname) && window.location.port !== '8080'))
     ? 'http://localhost:8080/api'
     : '/api';
 
